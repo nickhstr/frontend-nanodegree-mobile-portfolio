@@ -1,73 +1,225 @@
-## Website Performance Optimization portfolio project
+## Website Performance Optimization:
+Launch the URL for [index.html](http://nickhstr.github.io/frontend-nanodegree-mobile-portfolio/)
 
-Your challenge, if you wish to accept it (and we sure hope you will), is to optimize this online portfolio for speed! In particular, optimize the critical rendering path and make this page render as quickly as possible by applying the techniques you've picked up in the [Critical Rendering Path course](https://www.udacity.com/course/ud884).
+### Optimizations Performed
+1. Inline CSS styling:
+    - landing-page.html - embedded the style.css file
+    - added media="print" for print.css since it is render blocking
+2. Optimized images, compressed with Gulp using gulp-imagemin
+    - For views/pizzeria.jpg, the image was resized and copied using Preview for OS X
+3. Added async attribute for perfmatters.js and google analytics script:
+    - added the async attribute so that the script is executed asynchronously as soon as it is available.
+4. Minify js perfmatters.js with Gulp using gulp-uglify
+5. Minify css files with Gulp using gulp-minify-css
 
-To get started, check out the repository, inspect the code,
+#### Results
+1. PageSpeed Insights:
+    - Mobile: 95/100
+    - Desktop: 96/100
 
-### Getting started
 
-####Part 1: Optimize PageSpeed Insights score for index.html
+***
 
-Some useful tips to help you get started:
 
-1. Check out the repository
-1. To inspect the site on your phone, you can run a local server
+## Cam's Pizzeria
+1. Launch the URL for [Cam's Pizzeria](http://nickhstr.github.io/frontend-nanodegree-mobile-portfolio/views/pizza.html)
+2. Open Dev Tools
+3. Move the slider to change the pizza size - Check the console for time to change
+4. Scrolling the page - The console should show average time to generate the last ten frames in milliseconds
 
-  ```bash
-  $> cd /path/to/your-project-folder
-  $> python -m SimpleHTTPServer 8080
-  ```
+#### Changing Pizza Sizes
+1. Removed "determineDx" function 
+2. Placed switch statements for sizes within "changePizzasSizes"
+3. Created, and placed, "randomPizzas" variable outside of loop to save lookup time
 
-1. Open a browser and visit localhost:8080
-1. Download and install [ngrok](https://ngrok.com/) to make your local server accessible remotely.
+##### Original:
+    function determineDx (elem, size) {
+    var oldWidth = elem.offsetWidth;
+    var windowWidth = document.querySelector("#randomPizzas").offsetWidth;
+    var oldSize = oldWidth / windowWidth;
 
-  ``` bash
-  $> cd /path/to/your-project-folder
-  $> ngrok http 8080
-  ```
+    // Optional TODO: change to 3 sizes? no more xl?
+    // Changes the slider value to a percent width
+    function sizeSwitcher (size) {
+      switch(size) {
+        case "1":
+          return 0.25;
+        case "2":
+          return 0.3333;
+        case "3":
+          return 0.5;
+        default:
+          console.log("bug in sizeSwitcher");
+      }
+    }
 
-1. Copy the public URL ngrok gives you and try running it through PageSpeed Insights! Optional: [More on integrating ngrok, Grunt and PageSpeed.](http://www.jamescryer.com/2014/06/12/grunt-pagespeed-and-ngrok-locally-testing/)
+    var newSize = sizeSwitcher(size);
+    var dx = (newSize - oldSize) * windowWidth;
 
-Profile, optimize, measure... and then lather, rinse, and repeat. Good luck!
+    return dx;
+    }
 
-####Part 2: Optimize Frames per Second in pizza.html
+    // Iterates through pizza elements on the page and changes their widths
+    function changePizzaSizes(size) {
+    for (var i = 0; i < document.querySelectorAll(".randomPizzaContainer").length; i++) {
+      var dx = determineDx(document.querySelectorAll(".randomPizzaContainer")[i], size);
+      var newwidth = (document.querySelectorAll(".randomPizzaContainer")[i].offsetWidth + dx) + 'px';
+      document.querySelectorAll(".randomPizzaContainer")[i].style.width = newwidth;
+    }
+    }
+##### Modified:
+    function changePizzaSizes(size) {
+      switch(size) {
+        case "1":
+          newWidth = 25;
+          break;
+        case "2":
+          newWidth = 33.3;
+          break;
+        case "3":
+          newWidth = 50;
+          break;
+        default:
+          console.log("bug in sizeSwitcher");
+      }
 
-To optimize views/pizza.html, you will need to modify views/js/main.js until your frames per second rate is 60 fps or higher. You will find instructive comments in main.js. 
+      var randomPizzas = document.querySelectorAll(".randomPizzaContainer");
 
-You might find the FPS Counter/HUD Display useful in Chrome developer tools described here: [Chrome Dev Tools tips-and-tricks](https://developer.chrome.com/devtools/docs/tips-and-tricks).
+      for (var i = 0; i < randomPizzas.length; i++) {
+      randomPizzas[i].style.width = newWidth + "%";
+      }
+    }
 
-### Optimization Tips and Tricks
-* [Optimizing Performance](https://developers.google.com/web/fundamentals/performance/ "web performance")
-* [Analyzing the Critical Rendering Path](https://developers.google.com/web/fundamentals/performance/critical-rendering-path/analyzing-crp.html "analyzing crp")
-* [Optimizing the Critical Rendering Path](https://developers.google.com/web/fundamentals/performance/critical-rendering-path/optimizing-critical-rendering-path.html "optimize the crp!")
-* [Avoiding Rendering Blocking CSS](https://developers.google.com/web/fundamentals/performance/critical-rendering-path/render-blocking-css.html "render blocking css")
-* [Optimizing JavaScript](https://developers.google.com/web/fundamentals/performance/critical-rendering-path/adding-interactivity-with-javascript.html "javascript")
-* [Measuring with Navigation Timing](https://developers.google.com/web/fundamentals/performance/critical-rendering-path/measure-crp.html "nav timing api"). We didn't cover the Navigation Timing API in the first two lessons but it's an incredibly useful tool for automated page profiling. I highly recommend reading.
-* <a href="https://developers.google.com/web/fundamentals/performance/optimizing-content-efficiency/eliminate-downloads.html">The fewer the downloads, the better</a>
-* <a href="https://developers.google.com/web/fundamentals/performance/optimizing-content-efficiency/optimize-encoding-and-transfer.html">Reduce the size of text</a>
-* <a href="https://developers.google.com/web/fundamentals/performance/optimizing-content-efficiency/image-optimization.html">Optimize images</a>
-* <a href="https://developers.google.com/web/fundamentals/performance/optimizing-content-efficiency/http-caching.html">HTTP caching</a>
+#### Sliding Pizza Generator
+1. Modified the for loop to be more efficient.
+2. Reduced number of sliding pizzas generated from 200 to 30. You only need 30 to populate the page.
+3. Removed the width and height style to eliminate the process of resizing (the width and height are set in style.css)
 
-### Customization with Bootstrap
-The portfolio was built on Twitter's <a href="http://getbootstrap.com/">Bootstrap</a> framework. All custom styles are in `dist/css/portfolio.css` in the portfolio repo.
+##### Original:
+      document.addEventListener('DOMContentLoaded', function() {
+        var cols = 8;
+        var s = 256;
+        for (var i = 0; i < 200; i++) {
+          var elem = document.createElement('img');
+          elem.className = 'mover';
+          elem.src = "images/pizza.png";
+          elem.style.height = "100px";
+          elem.style.width = "73px";
+          elem.basicLeft = (i % cols) * s;
+          elem.style.top = (Math.floor(i / cols) * s) + 'px';
+          document.querySelector("#movingPizzas1").appendChild(elem);
+        }
+        updatePositions();
+      });
 
-* <a href="http://getbootstrap.com/css/">Bootstrap's CSS Classes</a>
-* <a href="http://getbootstrap.com/components/">Bootstrap's Components</a>
+##### Modified:
+    document.addEventListener('DOMContentLoaded', function() {
+      var cols = 8;
+      var s = 256;
+      for (var i = 0; i <= 30; i++) {
+        var elem = document.createElement('img');
+        elem.className = 'mover';
+        elem.src = "images/pizza.png";
+        elem.basicLeft = (i % cols) * s;
+        elem.style.top = (Math.floor(i / cols) * s) + 'px';
+        document.querySelector("#movingPizzas1").appendChild(elem);
+      }
+      updatePositions();
+    });
 
-### Sample Portfolios
+#### updatePositions
+Added savedScrollTop and placed it outside the for loop.
 
-Feeling uninspired by the portfolio? Here's a list of cool portfolios I found after a few minutes of Googling.
+##### Original:
+    function updatePositions() {
+      frame++;
+      window.performance.mark("mark_start_frame");
 
-* <a href="http://www.reddit.com/r/webdev/comments/280qkr/would_anybody_like_to_post_their_portfolio_site/">A great discussion about portfolios on reddit</a>
-* <a href="http://ianlunn.co.uk/">http://ianlunn.co.uk/</a>
-* <a href="http://www.adhamdannaway.com/portfolio">http://www.adhamdannaway.com/portfolio</a>
-* <a href="http://www.timboelaars.nl/">http://www.timboelaars.nl/</a>
-* <a href="http://futoryan.prosite.com/">http://futoryan.prosite.com/</a>
-* <a href="http://playonpixels.prosite.com/21591/projects">http://playonpixels.prosite.com/21591/projects</a>
-* <a href="http://colintrenter.prosite.com/">http://colintrenter.prosite.com/</a>
-* <a href="http://calebmorris.prosite.com/">http://calebmorris.prosite.com/</a>
-* <a href="http://www.cullywright.com/">http://www.cullywright.com/</a>
-* <a href="http://yourjustlucky.com/">http://yourjustlucky.com/</a>
-* <a href="http://nicoledominguez.com/portfolio/">http://nicoledominguez.com/portfolio/</a>
-* <a href="http://www.roxannecook.com/">http://www.roxannecook.com/</a>
-* <a href="http://www.84colors.com/portfolio.html">http://www.84colors.com/portfolio.html</a>
+      var items = document.querySelectorAll('.mover');
+      for (var i = 0; i < items.length; i++) {
+        var phase = Math.sin((document.body.scrollTop / 1250) + (i % 5));
+            items[i].style.left = items[i].basicLeft + 100 * phase + 'px';
+      }
+
+##### Modified:
+    function updatePositions() {
+      frame++;
+      window.performance.mark("mark_start_frame");
+      var items = document.querySelectorAll('.mover');
+      var savedScrollTop = document.body.scrollTop;
+      for (var i = 0; i < items.length; i++) {
+        var phase = Math.sin((savedScrollTop / 1250) + (i % 5));
+        items[i].style.left = items[i].basicLeft + 100 * phase + 'px';
+      }
+
+### Results
+1. Page Speed over 60 fps during scrolling (via console)
+2. Time to resize under 1 ms
+
+### References
+1. https://www.igvita.com/slides/2012/devtools-tips-and-tricks/jank-demo.html
+
+### Build Tools
+#### Gulp
+1. In order to use Gulp.js, node.js and npm must be installed
+2. After those two are installed, you must install Gulp globally
+3. Next, navigate to the project directory and install Gulp, as well as the necessary plugins
+  * Plugins used in this project:
+    1. gulp-uglify
+    2. gulp-minify-css
+    3. gulp-rename
+    4. gulp-imagemin
+4. Now, create gulp tasks (see gulpfile.js below)
+5. Type "gulp" in the terminal, and let Gulp take care of the rest! (Note: I left the "images" task unwatched; no need to recompress images constantly)
+
+##### gulpfile.js:
+
+    var gulp = require('gulp'),
+      uglify = require('gulp-uglify'),
+      rename = require('gulp-rename'),
+      minifyCSS = require('gulp-minify-css'),
+      imagemin = require('gulp-imagemin');
+
+    gulp.task('scriptMain', function() {
+      gulp.src('js/*.js')
+    .pipe(uglify())
+    .pipe(rename('perfmatters.min.js'))
+    .pipe(gulp.dest('js'));
+    });
+
+    gulp.task('scriptViews', function() {
+      gulp.src('views/js/*.js')
+    .pipe(uglify())
+    .pipe(rename('main.min.js'))
+    .pipe(gulp.dest('views/js'));
+    });
+
+    gulp.task('stylesMain', function() {
+      gulp.src('css/*.css')
+    .pipe(minifyCSS())
+    .pipe(gulp.dest('css/minCSS'));
+    });
+
+    gulp.task('stylesViews', function() {
+      gulp.src('views/css/*.css')
+    .pipe(minifyCSS())
+    .pipe(gulp.dest('views/css/minCSS'));
+    });
+
+    gulp.task('images', function() {
+      gulp.src('img/*')
+    .pipe(imagemin())
+    .pipe(gulp.dest('img'));
+      gulp.src('views/images/*')
+    .pipe(imagemin())
+    .pipe(gulp.dest('views/images'));
+    });
+
+    gulp.task('watch', function() {
+      gulp.watch('js/*.js', ['scriptMain']);
+      gulp.watch('views/js/*.js', ['scriptViews']);
+      gulp.watch('css/*.css', ['stylesMain']);
+      gulp.watch('views/css/*.css', ['stylesViews']);
+    });
+
+    gulp.task('default', ['scriptMain', 'scriptViews', 'stylesMain', 'stylesViews', 'watch']);
