@@ -145,15 +145,17 @@ Added savedScrollTop and placed it outside the for loop.
     function updatePositions() {
       frame++;
       window.performance.mark("mark_start_frame");
-      var items = document.querySelectorAll('.mover');
+      // Let's put scrollTop outside of the loop
       var savedScrollTop = document.body.scrollTop;
-      for (var i = 0; i < items.length; i++) {
+      // Cache items.length outside of the loop
+      var itemsLen = items.length;
+      for (var i = 0; i < itemsLen; i++) {
         var phase = Math.sin((savedScrollTop / 1250) + (i % 5));
         items[i].style.left = items[i].basicLeft + 100 * phase + 'px';
       }
 
 ### Results
-1. Page Speed over 60 fps during scrolling (via console)
+1. Scrolling at 60FPS (via console and FPS Meter)
 2. Time to resize under 1 ms
 
 ### References
